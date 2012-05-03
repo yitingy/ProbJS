@@ -1,9 +1,8 @@
 Soon:
-- implement RJMCMC
-- what other constructs are similarly problematic?
 - write models (with and without mh query), see what's used, start writing style guide, add req features to probjs
-- look through js specification, decide which individual features are useful/recommended, add to style guide
+- look through js specification, decide which individual features are useful/recommended/problematic, add to style guide
 - add xrps, maybe mem
 
 Eventually:
 - reduce stack trace overhead
+- implement RJMCMC
