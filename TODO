@@ -1,0 +1,9 @@
+
+make a gaussian xrp. 
+
+
+implement RJMCMC
+
+is it useful to allow for-loops for specifying the model.
+the reason that it doesn't work now is because they all have the same stacktrace address (same line number)
+

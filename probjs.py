@@ -1,6 +1,10 @@
 import sys
+import os
 
-filenames = ['stacktrace.js', 'xrp.js', "xrp-preamble.js", 'factor.js', 'mcmc-preamble.js'];
+filenames = os.listdir('random')
+filenames = filter(lambda f: f.endswith(".js"), filenames)
+filenames = map(lambda f: 'random/'+f, filenames)
+filenames += ['math-functions.js', 'stacktrace.js', 'xrp.js', "xrp-preamble.js", 'factor.js', 'mcmc-preamble.js'];
 infile = sys.argv[1]
 outfile = "temp.js"
 

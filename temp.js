@@ -1,3 +1,889 @@
+// From http://baagoe.com/en/RandomMusings/javascript/
+function Alea() {
+  return (function(args) {
+    // Johannes Baagøe <baagoe@baagoe.com>, 2010
+    var s0 = 0;
+    var s1 = 0;
+    var s2 = 0;
+    var c = 1;
+
+    if (args.length == 0) {
+      args = [+new Date];
+    }
+    var mash = Mash();
+    s0 = mash(' ');
+    s1 = mash(' ');
+    s2 = mash(' ');
+
+    for (var i = 0; i < args.length; i++) {
+      s0 -= mash(args[i]);
+      if (s0 < 0) {
+        s0 += 1;
+      }
+      s1 -= mash(args[i]);
+      if (s1 < 0) {
+        s1 += 1;
+      }
+      s2 -= mash(args[i]);
+      if (s2 < 0) {
+        s2 += 1;
+      }
+    }
+    mash = null;
+
+    var random = function() {
+      var t = 2091639 * s0 + c * 2.3283064365386963e-10; // 2^-32
+      s0 = s1;
+      s1 = s2;
+      return s2 = t - (c = t | 0);
+    };
+    random.uint32 = function() {
+      return random() * 0x100000000; // 2^32
+    };
+    random.fract53 = function() {
+      return random() + 
+        (random() * 0x200000 | 0) * 1.1102230246251565e-16; // 2^-53
+    };
+    random.version = 'Alea 0.9';
+    random.args = args;
+    return random;
+
+  } (Array.prototype.slice.call(arguments)));
+};
+// From http://baagoe.com/en/RandomMusings/javascript/
+function KISS07() {
+  return (function(args) {
+    // George Marsaglia, 2007-06-23
+    //http://groups.google.com/group/comp.lang.fortran/msg/6edb8ad6ec5421a5
+    var x = 123456789;
+    var y = 362436069;
+    var z =  21288629;
+    var w =  14921776;
+    var c = 0;
+
+    if (args.length == 0) {
+      args = [+new Date];
+    }
+    var mash = Mash();
+    for (var i = 0; i < args.length; i++) {
+      x ^= mash(args[i]) * 0x100000000; // 2^32
+      y ^= mash(args[i]) * 0x100000000;
+      z ^= mash(args[i]) * 0x100000000;
+      w ^= mash(args[i]) * 0x100000000;
+    }
+    if (y === 0) {
+      y = 1;
+    }
+    c ^= z >>> 31;
+    z &= 0x7fffffff;
+    if ((z % 7559) === 0) {
+      z++;
+    }
+    w &= 0x7fffffff;
+    if ((w % 7559) === 0) {
+      w++;
+    }
+    mash = null;
+
+    var uint32 = function() {
+      var t;
+
+      x += 545925293;
+      x >>>= 0;
+
+      y ^= y << 13;
+      y ^= y >>> 17;
+      y ^= y << 5;
+
+      t = z + w + c;
+      z = w;
+      c = t >>> 31;
+      w = t & 0x7fffffff;
+
+      return x + y + w >>> 0;
+    };
+
+    var random = function() {
+      return uint32() * 2.3283064365386963e-10; // 2^-32
+    };
+    random.uint32 = uint32;
+    random.fract53 = function() {
+      return random() +
+        (uint32() & 0x1fffff) * 1.1102230246251565e-16; // 2^-53
+    };
+    random.args = args;
+    random.version = 'KISS07 0.9';
+
+    return random;
+  } (Array.prototype.slice.call(arguments)));
+};
+// From http://baagoe.com/en/RandomMusings/javascript/
+function Kybos() {
+  return (function(args) {
+    // Johannes Baagøe <baagoe@baagoe.com>, 2010
+    var s0 = 0;
+    var s1 = 0;
+    var s2 = 0;
+    var c = 1;
+    var s = [];
+    var k = 0;
+
+    var mash = Mash();
+    var s0 = mash(' ');
+    var s1 = mash(' ');
+    var s2 = mash(' ');
+    for (var j = 0; j < 8; j++) {
+      s[j] = mash(' ');
+    }
+
+    if (args.length == 0) {
+      args = [+new Date];
+    }
+    for (var i = 0; i < args.length; i++) {
+      s0 -= mash(args[i]);
+      if (s0 < 0) {
+        s0 += 1;
+      }
+      s1 -= mash(args[i]);
+      if (s1 < 0) {
+        s1 += 1;
+      }
+      s2 -= mash(args[i]);
+      if (s2 < 0) {
+        s2 += 1;
+      }
+      for (var j = 0; j < 8; j++) {
+        s[j] -= mash(args[i]);
+        if (s[j] < 0) {
+          s[j] += 1;
+        }
+      }
+    }
+
+    var random = function() {
+      var a = 2091639;
+      k = s[k] * 8 | 0;
+      var r = s[k];
+      var t = a * s0 + c * 2.3283064365386963e-10; // 2^-32
+      s0 = s1;
+      s1 = s2;
+      s2 = t - (c = t | 0);
+      s[k] -= s2;
+      if (s[k] < 0) {
+        s[k] += 1;
+      }
+      return r;
+    };
+    random.uint32 = function() {
+      return random() * 0x100000000; // 2^32
+    };
+    random.fract53 = function() {
+      return random() +
+        (random() * 0x200000 | 0) * 1.1102230246251565e-16; // 2^-53
+    };
+    random.addNoise = function() {
+      for (var i = arguments.length - 1; i >= 0; i--) {
+        for (j = 0; j < 8; j++) {
+          s[j] -= mash(arguments[i]);
+          if (s[j] < 0) {
+            s[j] += 1;
+          }
+        }
+      }
+    };
+    random.version = 'Kybos 0.9';
+    random.args = args;
+    return random;
+
+  } (Array.prototype.slice.call(arguments)));
+};
+// From http://baagoe.com/en/RandomMusings/javascript/
+function LFib() {
+  return (function(args) {
+    // Johannes Baagøe <baagoe@baagoe.com>, 2010
+    var k0 = 255,
+        k1 = 52,
+        k2 = 0;
+    var s = [];
+
+    var mash = Mash();
+    if (args.length === 0) {
+      args = [+new Date()];
+    }
+    for (var j = 0; j < 256; j++) {
+      s[j] = mash(' ');
+      s[j] -= mash(' ') * 4.76837158203125e-7; // 2^-21
+      if (s[j] < 0) {
+        s[j] += 1;
+      }
+    }
+    for (var i = 0; i < args.length; i++) {
+      for (var j = 0; j < 256; j++) {
+        s[j] -= mash(args[i]);
+        s[j] -= mash(args[i]) * 4.76837158203125e-7; // 2^-21
+        if (s[j] < 0) {
+          s[j] += 1;
+        }
+      }
+    }
+    mash = null;
+
+    var random = function() {
+      k0 = (k0 + 1) & 255;
+      k1 = (k1 + 1) & 255;
+      k2 = (k2 + 1) & 255;
+
+      var x = s[k0] - s[k1];
+      if (x < 0.0) {
+        x += 1.0;
+      }
+      x -= s[k2];
+      if (x < 0.0) {
+        x += 1.0;
+      }
+      return s[k0] = x;
+    }
+
+    random.uint32 = function() {
+      return random() * 0x100000000 >>> 0; // 2^32
+    };
+    random.fract53 = random;
+    random.version = 'LFib 0.9';
+    random.args = args;
+
+    return random;
+  } (Array.prototype.slice.call(arguments)));
+};
+// From http://baagoe.com/en/RandomMusings/javascript/
+function LFIB4() {
+  return(function(args) {
+    // George Marsaglia's LFIB4,
+    //http://groups.google.com/group/sci.crypt/msg/eb4ddde782b17051
+    var k0 = 0,
+        k1 = 58,
+        k2 = 119,
+        k3 = 178;
+
+    var s = [];
+
+    var mash = Mash();
+    if (args.length === 0) {
+      args = [+new Date()];
+    }
+    for (var j = 0; j < 256; j++) {
+      s[j] = mash(' ');
+      s[j] -= mash(' ') * 4.76837158203125e-7; // 2^-21
+      if (s[j] < 0) {
+        s[j] += 1;
+      }
+    }
+    for (var i = 0; i < args.length; i++) {
+      for (var j = 0; j < 256; j++) {
+        s[j] -= mash(args[i]);
+        s[j] -= mash(args[i]) * 4.76837158203125e-7; // 2^-21
+        if (s[j] < 0) {
+          s[j] += 1;
+        }
+      }
+    }
+    mash = null;
+
+    var random = function() {
+      var x;
+
+      k0 = (k0 + 1) & 255;
+      k1 = (k1 + 1) & 255;
+      k2 = (k2 + 1) & 255;
+      k3 = (k3 + 1) & 255;
+
+      x = s[k0] - s[k1];
+      if (x < 0) {
+        x += 1;
+      }
+      x -= s[k2];
+      if (x < 0) {
+        x += 1;
+      }
+      x -= s[k3];
+      if (x < 0) {
+        x += 1;
+      }
+
+      return s[k0] = x;
+    }
+
+    random.uint32 = function() {
+      return random() * 0x100000000 >>> 0; // 2^32
+    };
+    random.fract53 = random;
+    random.version = 'LFIB4 0.9';
+    random.args = args;
+
+    return random;
+  } (Array.prototype.slice.call(arguments)));
+};
+// From http://baagoe.com/en/RandomMusings/javascript/
+// Johannes Baagøe <baagoe@baagoe.com>, 2010
+function Mash() {
+  var n = 0xefc8249d;
+
+  var mash = function(data) {
+    data = data.toString();
+    for (var i = 0; i < data.length; i++) {
+      n += data.charCodeAt(i);
+      var h = 0.02519603282416938 * n;
+      n = h >>> 0;
+      h -= n;
+      h *= n;
+      n = h >>> 0;
+      h -= n;
+      n += h * 0x100000000; // 2^32
+    }
+    return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
+  };
+
+  mash.version = 'Mash 0.9';
+  return mash;
+}
+
+// From http://baagoe.com/en/RandomMusings/javascript/
+function MRG32k3a() {
+  return (function(args) {
+    // Copyright (c) 1998, 2002 Pierre L'Ecuyer, DIRO, Université de Montréal.
+    // http://www.iro.umontreal.ca/~lecuyer/
+    var m1 = 4294967087;
+    var m2 = 4294944443;
+    var s10 = 12345,
+        s11 = 12345,
+        s12 = 123,
+        s20 = 12345,
+        s21 = 12345,
+        s22 = 123;
+
+    if (args.length === 0) {
+      args = [+new Date()];
+    }
+    var mash = Mash();
+    for (var i = 0; i < args.length; i++) {
+      s10 += mash(args[i]) * 0x100000000; // 2 ^ 32
+      s11 += mash(args[i]) * 0x100000000;
+      s12 += mash(args[i]) * 0x100000000;
+      s20 += mash(args[i]) * 0x100000000;
+      s21 += mash(args[i]) * 0x100000000;
+      s22 += mash(args[i]) * 0x100000000;
+    }
+    s10 %= m1;
+    s11 %= m1;
+    s12 %= m1;
+    s20 %= m2;
+    s21 %= m2;
+    s22 %= m2;
+    mash = null;
+
+    var uint32 = function() {
+      var m1 = 4294967087;
+      var m2 = 4294944443;
+      var a12 = 1403580;
+      var a13n = 810728;
+      var a21 = 527612;
+      var a23n = 1370589;
+
+      var k, p1, p2;
+
+      /* Component 1 */
+      p1 = a12 * s11 - a13n * s10;
+      k = p1 / m1 | 0;
+      p1 -= k * m1;
+      if (p1 < 0) p1 += m1;
+      s10 = s11;
+      s11 = s12;
+      s12 = p1;
+
+      /* Component 2 */
+      p2 = a21 * s22 - a23n * s20;
+      k = p2 / m2 | 0;
+      p2 -= k * m2;
+      if (p2 < 0) p2 += m2;
+      s20 = s21;
+      s21 = s22;
+      s22 = p2;
+
+      /* Combination */
+      if (p1 <= p2) return p1 - p2 + m1;
+      else return p1 - p2;
+    };
+
+    var random = function() {
+      return uint32() * 2.3283064365386963e-10; // 2^-32
+    };
+    random.uint32 = uint32;
+    random.fract53 = function() {
+      return random() +
+        (uint32() & 0x1fffff) * 1.1102230246251565e-16; // 2^-53
+    };
+    random.version = 'MRG32k3a 0.9';
+    random.args = args;
+
+    return random;
+  } (Array.prototype.slice.call(arguments)));
+};
+// From http://baagoe.com/en/RandomMusings/javascript/
+function Xorshift03() {
+  return (function(args) {
+    // George Marsaglia, 13 May 2003
+    // http://groups.google.com/group/comp.lang.c/msg/e3c4ea1169e463ae
+    var x = 123456789,
+        y = 362436069,
+        z = 521288629,
+        w = 88675123,
+        v = 886756453;
+
+    if (args.length == 0) {
+      args = [+new Date];
+    }
+    var mash = Mash();
+    for (var i = 0; i < args.length; i++) {
+      x ^= mash(args[i]) * 0x100000000; // 2^32
+      y ^= mash(args[i]) * 0x100000000;
+      z ^= mash(args[i]) * 0x100000000;
+      v ^= mash(args[i]) * 0x100000000;
+      w ^= mash(args[i]) * 0x100000000;
+    }
+    mash = null;
+
+    var uint32 = function() {
+      var t = (x ^ (x >>> 7)) >>> 0;
+      x = y;
+      y = z;
+      z = w;
+      w = v;
+      v = (v ^ (v << 6)) ^ (t ^ (t << 13)) >>> 0;
+      return ((y + y + 1) * v) >>> 0;
+    }
+
+    var random = function() {
+      return uint32() * 2.3283064365386963e-10; // 2^-32
+    };
+    random.uint32 = uint32;
+    random.fract53 = function() {
+      return random() +
+        (uint32() & 0x1fffff) * 1.1102230246251565e-16; // 2^-53
+    };
+    random.version = 'Xorshift03 0.9';
+    random.args = args;
+    return random;
+
+  } (Array.prototype.slice.call(arguments)));
+};
+// Set the random number generator
+var random = new MRG32k3a();
+var intRandom = random.uint32;
+
+// Use these functions from the scheme2js runtime.js if available
+var sc_list2vector = (typeof sc_list2vector == "function") ? sc_list2vector : function(x) { return x };
+var sc_vector2list = (typeof sc_vector2list == "function") ? sc_vector2list : function(x) { return x };
+
+function random_integer(n)
+{ 
+    return intRandom() % n; 
+}
+
+function random_real()
+{ 
+    return random(); 
+}
+
+function seed_rng(seed)
+{
+    random = new MRG32k3a(seed);
+    intRandom = random.uint32;
+}
+
+// Draw sample from Poisson distribution
+// Knuth TAOCP 2 (roughly optimal)
+function sample_poisson(mu)
+{
+    var k = 0;
+
+    while(mu > 10)
+    {
+        var m = 7/8*mu;
+        var x = Math.sample_gamma(m);
+
+        if(x > mu) return k + sample_binomial(mu/x, m-1);
+        else{ mu -= x; k += m; }
+    }
+
+    var emu = Math.exp(-mu);
+    var p = 1;
+    do{ p *= random(); k++; } while(p > emu);
+
+    return k-1;
+}
+
+// Poisson probability distribution function via iterative expansion
+function poisson_pdf(k, mu)
+{
+    return Math.exp(k * Math.log(mu) - mu - lnfact(k));
+}
+
+// Draw sample from a Gamma distribution
+// Marsagli and Tsang '00 (roughly optimal)
+function sample_gamma(a,b)
+{
+    if(a < 1) return sample_gamma(1+a,b) * Math.pow(random(), 1/a);
+
+    var x,v,u;
+    var d = a-1/3;
+    var c = 1/Math.sqrt(9*d);
+
+    while(true)
+    {
+        do{x = sample_gaussian(0,1);  v = 1+c*x;} while(v <= 0);
+
+        v=v*v*v;
+        u=random();
+
+        if((u < 1 - .331*x*x*x*x) || (Math.log(u) < .5*x*x + d*(1 - v + Math.log(v)))) return b*d*v;
+    }
+}
+
+// Evaluate gamma pdf
+function gamma_pdf(x,a,b)
+{
+    if(x<0) return 0;
+    if(x==0) return a==1 ? 1/b : 0;
+    if(a==1) return Math.exp(-x/b)/b;
+    
+    return Math.exp((a - 1)*Math.log(x/b) - x/b - log_gamma(a))/b;
+}
+
+// Evaluate log gammma pdf
+function gamma_lnpdf(x,a,b)
+{
+    return (1 - a)*Math.log(x) - x/b - log_gamma(a) - a*Math.log(b);
+}
+
+// Draw a sample from a Binomial distribution
+// Knuth TAOCP 2 (could be improved, i.e. via Kachitvichyanukul & Schmeiser)
+function sample_binomial(p,n)
+{
+    var k = 0;
+    var N = 10;
+
+    var a, b;
+    while(n > N)
+    {
+        a = 1 + n/2;
+        b = 1 + n-a;
+
+        var x = sample_beta(a,b);
+
+        if(x >= p){ n = a-1; p /= x; }
+        else{ k += a; n = b - 1; p = (p-x) / (1-x); }
+    }
+
+    var u;
+    for(i=0; i<n; i++)
+    {
+        u = random();
+        if(u<p) k++;
+    }
+
+    return k;
+}
+
+// Binomial probability distribution function via Normal approximation
+// Peizer & Pratt 1968, JASA 63: 1416-1456 (may not be optimal...)
+function binomial_pdf(k, p, n)
+{
+    var inv2 = 1/2, inv3 = 1/3, inv6 = 1/6;
+
+    if (k >= n) return 1;
+
+    var q = 1 - p;
+    var s = k + inv2;
+    var t = n - k - inv2;
+    var d1 = s + inv6 - (n + inv3) * p;
+    var d2 = q /(s+inv2) - p/(t+inv2) + (q-inv2)/(n+1);
+
+    d2 = d1 + 0.02 * d2;
+
+    var num = 1 + q * g(s/(n*p)) + p * g(t/(n*q));
+    var den = (n + inv6) * p * q;
+    var z = num / den;
+
+    z = d2 * Math.sqrt(z);
+    z = normal_cdf(z);
+
+    return z;
+}
+
+// Draw a sample from a Beta distribution
+// Knuth TAOCP 2 (roughly optimal)
+function sample_beta(a, b)
+{
+    var x = sample_gamma(a, 1);
+    return x / (x + sample_gamma(b, 1));
+}
+
+// Draw a sample from a Gaussian distribution
+// Leva '92 (could be improved, i.e. via Ziggurat method)
+function sample_gaussian(mu,sigma)
+{
+    var u, v, x, y, q;
+
+    do
+    {
+        u = 1 - random();
+        v = 1.7156 * (random() - .5);
+        x = u - 0.449871;
+        y = Math.abs(v) + 0.386595;
+        q = x*x + y*(0.196*y - 0.25472*x);
+    }
+    while(q >= 0.27597 && (q > 0.27846 || v*v > -4 * u * u * Math.log(u)))
+
+    return mu + sigma*v/u;
+}
+
+// Evaluate the gaussian distribution
+function gaussian_pdf(x,mu,sigma)
+{
+    x-=mu;
+    var asigma = Math.abs(sigma);
+    var u = x/asigma;
+    return (1/ Math.sqrt(2*Math.PI) * asigma) * Math.exp(-u*u/2);  
+}
+
+// Evaluate the log gaussian distribution
+function gaussian_lnpdf(x,mu,sigma)
+{
+    return -.5*(1.8378770664093453 + Math.log(sigma) + (x - mu)*(x - mu)/sigma);
+}
+
+// Draw a sample from a Dirichlet distribution
+// Law & Kelton (roughly optimal)
+// TODO: may need to match function signature for Ikarus compatibility
+// TODO: handle underflow in normalization
+function sample_dirichlet(alpha)
+{
+    alpha = sc_list2vector(alpha);
+    var theta = new Array(alpha.length);
+    var sum = 0;
+
+    for(i=0; i<alpha.length; i++){ theta[i] = sample_gamma(alpha[i],1); sum += theta[i]; }
+    for(i=0; i<alpha.length; i++) theta[i] /= sum;
+    
+    return sc_vector2list(theta);
+}
+
+// Evaluate the logarithm of the Dirichlet distribution
+function dirichlet_lnpdf(theta, alpha)
+{
+    alpha = sc_list2vector(alpha);
+    theta = sc_list2vector(theta);
+    var logp = log_gamma(sum(alpha));
+    
+    for(i=0; i<alpha.length; i++) logp += (alpha[i] - 1)*Math.log(theta[i]);
+    for(i=0; i<alpha.length; i++) logp -= log_gamma(alpha[i]);
+
+    return logp;      
+}
+
+// Draw a sample from a Student's t-distribution
+// Marsaglia '80
+function sample_tdist(nu)
+{
+    if(nu <= 2) return sample_gaussian(0,1) / sqrt( 2 * sample_gamma(nu/2, 1) / nu);
+
+    var a,b,c,t;
+    do
+    {
+        a = sample_gaussian(0,1);
+        b = -1 / (nu/2 - 1) * log1p(-random());
+        c = a*a/(nu - 2);
+    }
+    while(1-c < 0 || Math.exp(-b-c) > (1-c));
+
+    return a / Math.sqrt((1-c/nu) * (1-c));
+}
+
+// Evaluate t-distribution
+function tdist_pdf(x,nu)
+{
+    var a = log_gamma(nu/2);
+    var b = log_gamma((nu+1)/2);
+    
+    return Math.exp(b-a)/Math.sqrt(Math.PI*nu) * Math.pow(1 + x*x/nu, -(nu+1)/2);
+}
+
+// Draw a sample from a generalized t-distribution
+function sample_generalized_tdist(nu,mu,sigma_squared)
+{
+    return sample_tdist(nu)*Math.sqrt(sigma_squared) + mu;
+}
+
+// Return the log of a sum of exponentials, to minimize under/overflow
+function logsumexp(v)
+{
+    v = sc_list2vector(v);
+    var t=0,
+        val;
+
+    for(i=0;i<v.length;i++)
+    {
+        var abs=Math.abs(v[i]);        
+        if(abs>t){ t=abs; val=v[i]; }                          
+    }
+
+    var sum=0;
+    for(i=0;i<v.length;i++) {
+      sum += Math.exp(v[i]-val);
+    }
+
+    return Math.log(sum) + val;
+}
+
+// Evaluate the log of gamma(x)
+// Lancsoz approximation from Numerical Recipes in C
+function log_gamma(xx)
+{
+    var cof = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5]; 
+
+    var x = xx - 1.0;
+    var tmp = x + 5.5; tmp -= (x + 0.5)*Math.log(tmp);
+    var ser=1.000000000190015;
+    for (j=0;j<=5;j++){ x++; ser += cof[j]/x; }
+    return -tmp+Math.log(2.5066282746310005*ser);
+}
+
+// Calculate the sum of elements in a vector
+// N.B.: this doesn't get used in compiled Church->JS code
+// so we don't need to use sc_list2vector / sc_vector2list
+function sum(v)
+{
+    var sum=0;
+    for(i=0;i<v.length;i++) sum += v[i];
+    return sum;
+}
+
+// Calculate the mean of elements in a vector
+// N.B.: this doesn't get used in compiled Church->JS code
+// so we don't need to use sc_list2vector / sc_vector2list
+function mean(v)
+{
+    return sum(v)/v.length;
+}
+
+// Normalize a vector
+function normalize(v)
+{
+    v = sc_list2vector(v);
+    var s=0;
+    for(i=0;i<v.length;i++) s += v[i]*v[i];
+    s = Math.sqrt(s);
+    for(i=0;i<v.length;i++) v[i] /= s;
+    return sc_vector2list(v);
+}
+
+// Returns log(1 + x) in a numerically stable way
+function log1p(x)
+{
+    var ret = 0;
+    var n = 50; // degree of precision
+
+    if(x <= -1) return Number.NEGATIVE_INFINITY;
+    if(x < 0 || x > 1) return Math.log(1+x);
+
+    for(i=1; i<n; i++)
+        if ((i % 2) === 0) ret -= Math.pow(x,i)/i;
+        else ret += Math.pow(x,i)/i;
+
+    return ret;
+}
+
+// factorial(x)
+function fact(x)
+{
+    var t=1;
+    while(x>1) t*=x--;
+    return t;
+}
+
+// ln(x!) by Stirling's formula
+// [Knuth I: p111]
+function lnfact(x)
+{
+    if (x < 1) x = 1;
+
+    if (x < 12) return Math.log(fact(Math.round(x)));
+
+    var invx = 1 / x;
+    var invx2 = invx * invx;
+    var invx3 = invx2 * invx;
+    var invx5 = invx3 * invx2;
+    var invx7 = invx5 * invx2;
+
+    var sum = ((x + 0.5) * Math.log(x)) - x;
+    sum += Math.log(2*Math.PI) / 2;
+    sum += (invx / 12) - (invx3 / 360);
+    sum += (invx5 / 1260) - (invx7 / 1680);
+
+    return sum;
+}
+
+// logistic(x)
+function logistic(x)
+{
+    return 1 / (1 + Math.exp(-x));
+}
+
+// Normal cumulative distribution function
+// Abramowitz & Stegun 26.2.19
+// |e(x)| < 1.5E-7
+function normal_cdf(x)
+{
+    var d1 = 0.0498673470;
+    var d2 = 0.0211410061;
+    var d3 = 0.0032776263;
+    var d4 = 0.0000380036;
+    var d5 = 0.0000488906;
+    var d6 = 0.0000053830;
+    var a = Math.abs(x);
+    var t;
+
+   t = 1.0 + a*(d1+a*(d2+a*(d3+a*(d4+a*(d5+a*d6)))));
+
+   t *= t;  t *= t;  t *= t;  t *= t;
+   t = 1.0 / (t+t);
+
+   if (x >= 0)  t = 1-t;
+   return t;
+}
+
+// Peizer & Pratt 1968, JASA 63: 1416-1456
+function g(x)
+{
+    var  switchlev = 0.1;
+    var z;
+
+    if (x == 0)  return 1;
+    if (x == 1)  return 0;
+
+    var d = 1 - x;
+
+    if (Math.abs(d) > switchlev) return (1 - (x * x) + (2 * x * Math.log(x))) / (d * d);
+
+    z = d / 3;
+    var di = d;
+
+    for (var i = 2; i <= 7; i++)
+    {
+        di *= d;
+        z += (2 * di) / ((i+1) * (i+2));
+    }
+    return z;
+}
 // Domain Public by Eric Wendelin http://eriwen.com/ (2008)
 //                  Luke Smith http://lucassmith.name/ (2008)
 //                  Loic Dachary <loic@dachary.org> (2008)
@@ -606,6 +1492,14 @@ var flip = make_stateless_xrp(
         ]
         );
 
+var gaussian = make_stateless_xrp(
+        "gaussian",
+        sample_gaussian,
+        function(args, val){
+            return gaussian_lnpdf(val, args[0], args[1])
+        },
+        []
+        )
 function Factor(address, args, value, factor_function, ticks){
     this.address = address;
     this.args = args;
@@ -704,23 +1598,27 @@ function repeat(n, fx){
     }
 }
 
+var tf_eq_float = make_factor(
+        function(x, y){
+            return gaussian_lnpdf((x-y), 0, 0.01);
+        }
+        );
+
 var tf_eq = make_factor(
         function(x, y){
-            console.log([x, y]);
             if (x == y){
-                console.log("eq!");
-                return Math.log(0.05);
-            }else{
-                console.log("NOT eq!");
                 return Math.log(1.0);
+            }else{
+                return Math.log(0.05);
             }
         }
         );
 
 console.log("-----------------");
 function my_distribution(){
-    var sample = repeat(2, flip);
-    tf_eq(sample[0], sample[1]);
+    var sample = repeat(2, function(){return gaussian(0, 1);});
+    //var sample = repeat(2, flip);
+    tf_eq_float(sample[0], sample[1]);
     return sample; 
 }
 var results = mh_query(100, 1, my_distribution);

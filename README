@@ -1,0 +1,4 @@
+How to run a model:
+
+python probjs.py <model_filename.js>
+node temp.js

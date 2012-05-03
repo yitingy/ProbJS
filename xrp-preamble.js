@@ -56,3 +56,11 @@ var flip = make_stateless_xrp(
         ]
         );
 
+var gaussian = make_stateless_xrp(
+        "gaussian",
+        sample_gaussian,
+        function(args, val){
+            return gaussian_lnpdf(val, args[0], args[1])
+        },
+        []
+        )
