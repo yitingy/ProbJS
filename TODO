@@ -2,6 +2,8 @@ Soon:
 - write models (with and without mh query), see what's used, start writing style guide, add req features to probjs
 - look through js specification, decide which individual features are useful/recommended/problematic, add to style guide
 - add xrps, maybe mem
+- forward-model & laziness: intermediate representation s.t. graphics rendering can incrementally pull?
+  "infinite zoom", different levels of detail, coarse-fine
 
 Eventually:
 - reduce stack trace overhead
